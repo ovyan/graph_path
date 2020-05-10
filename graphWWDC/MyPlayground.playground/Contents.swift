@@ -77,7 +77,7 @@ class MyViewController: UIViewController {
         for circ in circles {
             view.addSubview(circ)
         }
-        let btn = UIButton(frame: CGRect(x: 180, y: 40, width: 100, height: 40))
+        let btn = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
         btn.setTitle("Start DFS", for: .normal)
         btn.backgroundColor = .red
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
