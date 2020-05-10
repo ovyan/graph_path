@@ -3,6 +3,10 @@
 import PlaygroundSupport
 import UIKit
 
+func onMain(_ block: @escaping() -> Void) {
+    DispatchQueue.main.async(execute: block)
+}
+
 class MyViewController: UIViewController {
     let Adj_Matr = [
         [-1, 4, 3, -1, -1, -1, -1],
@@ -38,14 +42,14 @@ class MyViewController: UIViewController {
 
     func showPath(path: [Int]) {
         for nodeId in path {
-            DispatchQueue.main.async {
+            onMain {
                 let my_circle: UIView = self.view.viewWithTag(nodeId + 1)! as UIView
                 my_circle.backgroundColor = UIColor.red
             }
-
-            print("Painted", Thread.isMainThread)
-            sleep(2)
+            
+            sleep(1)
         }
+        
     }
 
     let dx = [1, 5, 1, 5, 1, 5, 3]
@@ -55,7 +59,9 @@ class MyViewController: UIViewController {
     func startTapped() {
         dfs(vert: 0)
         DispatchQueue.global().async {
-            self.showPath(path: self.shortestPath)
+            for i in 0...1 {
+                self.showPath(path: self.shortestPath)
+            }
         }
     }
 
@@ -83,9 +89,19 @@ class MyViewController: UIViewController {
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
 
         view.addSubview(btn)
+        view.bounds.size.width = 100
+        view.bounds.size.height = 100
+        
         self.view = view
+        
+    }
+    override func viewDidLayoutSubviews() {
+        print(view.bounds.size)
     }
 }
 
 // Present the view controller in the Live View window
-PlaygroundPage.current.liveView = MyViewController()
+let a = MyViewController()
+a.preferredContentSize = CGSize(width: 560, height: 880)
+PlaygroundPage.current.liveView = a
+
