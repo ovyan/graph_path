@@ -119,7 +119,7 @@ class MyViewController: UIViewController {
                 }
             }
         }
-        usleep(300 * 1_000)
+        usleep(200 * 1_000)
         onMain {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
@@ -135,10 +135,42 @@ class MyViewController: UIViewController {
     let dx = [1, 9, 1, 9, 1, 9, 5]
     let dy = [0, 0, 2, 2, 4, 4, 5]
 
+    func driveToPoint(car: UIView, endPoint: CGPoint) {
+        onMain {
+            UIView.animate(withDuration: 2, delay: 0, options: [.curveEaseInOut], animations: {
+                car.center = endPoint
+            }, completion: nil)
+        }
+    }
+    
+    func turnCar(car: UIView, endPoint: CGPoint) {
+        let direction = CGPoint(x: endPoint.x - car.center.x, y: endPoint.y - car.center.y)
+        let angle = atan2(direction.y, direction.x)
+        print(angle)
+        onMain {
+            UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseInOut], animations: {
+                car.transform = CGAffineTransform(rotationAngle: angle + .pi)
+            }, completion: nil)
+        }
+    }
+
+    func driveCar(path: [Int]) {
+        let car: UIView = self.view.viewWithTag(1_337)! as UIView
+        for i in 1 ..< path.count {
+            let endCircle: UIView = self.view.viewWithTag(path[i] + 1)! as UIView
+            let endPoint = CGPoint(x: endCircle.frame.midX, y: endCircle.frame.midY)
+            turnCar(car: car, endPoint: endPoint)
+            sleep(1)
+            driveToPoint(car: car, endPoint: endPoint)
+            sleep(2) // wait for completion
+        }
+    }
+
     @objc
     func startTapped() {
         DispatchQueue.global().async {
             self.dfs(vert: 0)
+            self.driveCar(path: self.shortestPath)
         }
     }
 
@@ -161,15 +193,25 @@ class MyViewController: UIViewController {
         for circ in circles {
             view.addSubview(circ)
         }
+
         let btn = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
         btn.setTitle("Start DFS", for: .normal)
         btn.backgroundColor = .red
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
 
+        let car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
+        car.transform = CGAffineTransform(rotationAngle: .pi)
+//        car.backgroundColor = .red
+        car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
+        car.tag = 1_337
+
         view.addSubview(btn)
+
         view.layer.addSublayer(contentLayerFinal)
         view.layer.addSublayer(contentLayer)
         view.layer.addSublayer(contentLayer2)
+
+        view.addSubview(car)
 
         view.bounds.size.height = 750
         view.bounds.size.width = 450
