@@ -24,10 +24,6 @@ class MyViewController: UIViewController {
             print(cost[6])
             print(path)
             shortestPath = path
-//            DispatchQueue.main.async {
-//                self.showPath(path: self.path)
-//            }
-//            sleep(10)
             return
         }
         for i in 0 ..< Adj_Matr[vert].count {
@@ -42,9 +38,13 @@ class MyViewController: UIViewController {
 
     func showPath(path: [Int]) {
         for nodeId in path {
-            let my_circle : UIView = self.view.viewWithTag(nodeId + 1)! as UIView
-            my_circle.backgroundColor = UIColor.red
-//            sleep(2)
+            DispatchQueue.main.async {
+                let my_circle: UIView = self.view.viewWithTag(nodeId + 1)! as UIView
+                my_circle.backgroundColor = UIColor.red
+            }
+
+            print("Painted", Thread.isMainThread)
+            sleep(2)
         }
     }
 
@@ -54,9 +54,11 @@ class MyViewController: UIViewController {
     @objc
     func startTapped() {
         dfs(vert: 0)
-        showPath(path: shortestPath)
+        DispatchQueue.global().async {
+            self.showPath(path: self.shortestPath)
+        }
     }
-    
+
     override func loadView() {
         let view = UIView()
         view.backgroundColor = .white
@@ -79,12 +81,10 @@ class MyViewController: UIViewController {
         btn.setTitle("Start DFS", for: .normal)
         btn.backgroundColor = .red
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
-        
+
         view.addSubview(btn)
         self.view = view
     }
-    
-    
 }
 
 // Present the view controller in the Live View window
