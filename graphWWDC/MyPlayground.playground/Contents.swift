@@ -8,9 +8,12 @@ func onMain(_ block: @escaping () -> Void) {
 }
 
 class MyViewController: UIViewController {
+    let circleLightsLayer = CALayer()
     let contentLayer = CALayer()
     let contentLayer2 = CALayer()
     let contentLayerFinal = CALayer()
+
+    var car = UIView()
 
     var Adj_Matr = [
         [-1, -1, -1, -1, -1, -1, -1],
@@ -22,12 +25,12 @@ class MyViewController: UIViewController {
         [-1, -1, -1, -1, -1, -1, -1]
     ]
 
-    var waitTime = [0, 1, 2, 3, 4, 5, 0]
+    var waitTime = [0, 1, 2, 3, 4, 5, 1]
 
     var cost = [0, -1, -1, -1, -1, -1, -1]
     var path = [0]
     var shortestPath = [Int]()
-    
+
     func setupGraph() {
         cost = [0, -1, -1, -1, -1, -1, -1]
         path = [0]
@@ -44,11 +47,14 @@ class MyViewController: UIViewController {
         Adj_Matr[5][4] = waitTime[4]
         Adj_Matr[5][6] = waitTime[6]
     }
-    
+
     func randomizeTime() {
-        for i in 1...5 {
+        for i in 1 ... 5 {
             let timeLabel: UILabel = self.view.viewWithTag((i + 1) * 100) as! UILabel
-            let randomInt = Int.random(in: 1..<7)
+            var randomInt = Int.random(in: 1 ..< 8)
+            if i == 3 {
+                randomInt = Int.random(in: 1 ..< 4)
+            }
             waitTime[i] = randomInt
             timeLabel.text = "\(randomInt)"
         }
@@ -147,7 +153,7 @@ class MyViewController: UIViewController {
                 }
             }
         }
-        usleep(200 * 1_000)
+        usleep(100 * 1_000)
         onMain {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
@@ -177,8 +183,31 @@ class MyViewController: UIViewController {
             }, completion: nil)
         }
     }
-    
-    
+
+    func animateCircle(duration: TimeInterval, circle: UIView) {
+        onMain {
+            let circlePath = UIBezierPath(arcCenter: CGPoint(x: circle.frame.midX, y: circle.frame.midY), radius: 72 / 2, startAngle: 0.0, endAngle: CGFloat(Double.pi * 2.0), clockwise: true)
+
+            let circleLayer = CAShapeLayer()
+            circleLayer.path = circlePath.cgPath
+            circleLayer.fillColor = UIColor.clear.cgColor
+            circleLayer.strokeColor = UIColor.red.cgColor
+            circleLayer.lineWidth = 3.0
+            circleLayer.strokeEnd = 0.0
+
+            self.circleLightsLayer.addSublayer(circleLayer)
+
+            let animation = CABasicAnimation(keyPath: "strokeEnd")
+            animation.duration = duration
+            animation.fromValue = 0
+            animation.toValue = 1
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+
+            circleLayer.strokeEnd = 1.0
+
+            circleLayer.add(animation, forKey: "animateCircle")
+        }
+    }
 
     func driveCar(path: [Int]) {
         let car: UIView = self.view.viewWithTag(1_337)! as UIView
@@ -188,27 +217,59 @@ class MyViewController: UIViewController {
             turnCar(car: car, endPoint: endPoint)
             sleep(1)
             driveToPoint(car: car, endPoint: endPoint)
-            sleep(2) // wait for completion
+            sleep(2) // wait for completionself.
+            animateCircle(duration: TimeInterval(waitTime[path[i]]), circle: endCircle)
             sleep(UInt32(waitTime[path[i]]))
         }
     }
 
-    @objc
-    func startTapped() {
-        DispatchQueue.global().async {
-            self.setupGraph()
-            self.dfs(vert: 0)
-            self.driveCar(path: self.shortestPath)
+    func cleanScreen() {
+        onMain {
+            self.circleLightsLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+            self.contentLayerFinal.sublayers?.forEach { $0.removeFromSuperlayer() }
+            self.car.removeFromSuperview()
+            self.car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
+            self.car.transform = CGAffineTransform(rotationAngle: .pi)
+            self.car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
+            self.car.tag = 1_337
+            self.view.addSubview(self.car)
         }
     }
     
+    func showAlert() {
+        
+    }
+
+    var isRunning = false
+
+    @objc
+    func startTapped(sender: UIButton) {
+        if !isRunning {
+            sender.backgroundColor = .gray
+            DispatchQueue.global().async {
+                self.isRunning = true
+                self.cleanScreen()
+                self.setupGraph()
+                self.dfs(vert: 0)
+                self.driveCar(path: self.shortestPath)
+//                self.showAlert()
+                self.cleanScreen()
+                self.isRunning = false
+            }
+        } else {
+            print("running")
+//            cleanScreen()
+//            sender.backgroundColor = .red
+        }
+    }
+
     @objc
     func randomBtnTapped() {
         randomizeTime()
     }
-    
+
     @objc
-    func circleTapped(sender : UITapGestureRecognizer) {
+    func circleTapped(sender: UITapGestureRecognizer) {
         print(sender.view?.tag)
     }
 
@@ -226,7 +287,7 @@ class MyViewController: UIViewController {
             circle.layer.cornerRadius = 35
             circle.alpha = 0.2
             circle.tag = i + 1
-            let gesture = UITapGestureRecognizer(target: self, action:  #selector(self.circleTapped))
+            let gesture = UITapGestureRecognizer(target: self, action: #selector(self.circleTapped))
             circle.addGestureRecognizer(gesture)
 
             circles.append(circle)
@@ -247,16 +308,16 @@ class MyViewController: UIViewController {
         }
 
         let startButton = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
-        startButton.setTitle("Start DFS", for: .normal)
+        startButton.setTitle("Run", for: .normal)
         startButton.backgroundColor = .red
         startButton.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
-        
+
         let randomButton = UIButton(frame: CGRect(x: 250, y: 40, width: 100, height: 40))
         randomButton.setTitle("Randomize", for: .normal)
         randomButton.backgroundColor = .red
         randomButton.addTarget(self, action: #selector(randomBtnTapped), for: .touchUpInside)
 
-        let car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
+        car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
         car.transform = CGAffineTransform(rotationAngle: .pi)
         car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
         car.tag = 1_337
@@ -264,10 +325,11 @@ class MyViewController: UIViewController {
         view.addSubview(randomButton)
         view.addSubview(startButton)
 
+        view.layer.addSublayer(circleLightsLayer)
         view.layer.addSublayer(contentLayerFinal)
         view.layer.addSublayer(contentLayer)
         view.layer.addSublayer(contentLayer2)
-        
+
         view.addSubview(car)
 
         view.bounds.size.height = 750
@@ -285,6 +347,8 @@ class MyViewController: UIViewController {
         contentLayer.position = view.center
         contentLayer2.bounds = view.layer.bounds
         contentLayer2.position = view.center
+        circleLightsLayer.bounds = view.layer.bounds
+        circleLightsLayer.position = view.center
     }
 }
 
