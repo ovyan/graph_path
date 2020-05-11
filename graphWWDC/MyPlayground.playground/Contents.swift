@@ -12,19 +12,47 @@ class MyViewController: UIViewController {
     let contentLayer2 = CALayer()
     let contentLayerFinal = CALayer()
 
-    let Adj_Matr = [
-        [-1, 4, 3, -1, -1, -1, -1],
-        [-1, -1, -1, 2, -1, -1, -1],
-        [-1, -1, -1, 2, 5, -1, -1],
-        [-1, -1, 3, -1, -1, 1, -1],
-        [-1, -1, -1, -1, -1, 1, 0],
-        [-1, -1, -1, -1, 5, -1, 0],
+    var Adj_Matr = [
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
         [-1, -1, -1, -1, -1, -1, -1]
     ]
+
+    var waitTime = [0, 1, 2, 3, 4, 5, 0]
 
     var cost = [0, -1, -1, -1, -1, -1, -1]
     var path = [0]
     var shortestPath = [Int]()
+    
+    func setupGraph() {
+        cost = [0, -1, -1, -1, -1, -1, -1]
+        path = [0]
+        shortestPath = [Int]()
+        Adj_Matr[0][1] = waitTime[1]
+        Adj_Matr[0][2] = waitTime[2]
+        Adj_Matr[1][3] = waitTime[3]
+        Adj_Matr[2][3] = waitTime[3]
+        Adj_Matr[2][4] = waitTime[4]
+        Adj_Matr[3][2] = waitTime[2]
+        Adj_Matr[3][5] = waitTime[5]
+        Adj_Matr[4][5] = waitTime[5]
+        Adj_Matr[4][6] = waitTime[6]
+        Adj_Matr[5][4] = waitTime[4]
+        Adj_Matr[5][6] = waitTime[6]
+    }
+    
+    func randomizeTime() {
+        for i in 1...5 {
+            let timeLabel: UILabel = self.view.viewWithTag((i + 1) * 100) as! UILabel
+            let randomInt = Int.random(in: 1..<7)
+            waitTime[i] = randomInt
+            timeLabel.text = "\(randomInt)"
+        }
+    }
 
     func dfs(vert: Int) {
         if vert == 6 {
@@ -68,14 +96,14 @@ class MyViewController: UIViewController {
                 let shapeLayer = CAShapeLayer()
                 shapeLayer.path = line.cgPath
                 shapeLayer.strokeColor = UIColor.green.cgColor
-                shapeLayer.lineWidth = 18
+                shapeLayer.lineWidth = 16
 
-                let circle = UIBezierPath(roundedRect: CGRect(x: endCircle.frame.midX - 10, y: endCircle.frame.midY - 10, width: 20, height: 20), cornerRadius: 10)
+                let circle = UIBezierPath(roundedRect: CGRect(x: endCircle.frame.midX - 8, y: endCircle.frame.midY - 8, width: 16, height: 16), cornerRadius: 8)
 
                 let shapeLayerCircle = CAShapeLayer()
                 shapeLayerCircle.path = circle.cgPath
                 shapeLayerCircle.strokeColor = UIColor.green.cgColor
-                shapeLayerCircle.lineWidth = 20
+                shapeLayerCircle.lineWidth = 16
 
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
@@ -132,9 +160,6 @@ class MyViewController: UIViewController {
         }
     }
 
-    let dx = [1, 9, 1, 9, 1, 9, 5]
-    let dy = [0, 0, 2, 2, 4, 4, 5]
-
     func driveToPoint(car: UIView, endPoint: CGPoint) {
         onMain {
             UIView.animate(withDuration: 2, delay: 0, options: [.curveEaseInOut], animations: {
@@ -142,17 +167,18 @@ class MyViewController: UIViewController {
             }, completion: nil)
         }
     }
-    
+
     func turnCar(car: UIView, endPoint: CGPoint) {
         let direction = CGPoint(x: endPoint.x - car.center.x, y: endPoint.y - car.center.y)
         let angle = atan2(direction.y, direction.x)
-        print(angle)
         onMain {
             UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseInOut], animations: {
                 car.transform = CGAffineTransform(rotationAngle: angle + .pi)
             }, completion: nil)
         }
     }
+    
+    
 
     func driveCar(path: [Int]) {
         let car: UIView = self.view.viewWithTag(1_337)! as UIView
@@ -163,15 +189,27 @@ class MyViewController: UIViewController {
             sleep(1)
             driveToPoint(car: car, endPoint: endPoint)
             sleep(2) // wait for completion
+            sleep(UInt32(waitTime[path[i]]))
         }
     }
 
     @objc
     func startTapped() {
         DispatchQueue.global().async {
+            self.setupGraph()
             self.dfs(vert: 0)
             self.driveCar(path: self.shortestPath)
         }
+    }
+    
+    @objc
+    func randomBtnTapped() {
+        randomizeTime()
+    }
+    
+    @objc
+    func circleTapped(sender : UITapGestureRecognizer) {
+        print(sender.view?.tag)
     }
 
     override func loadView() {
@@ -179,38 +217,57 @@ class MyViewController: UIViewController {
         view.backgroundColor = .white
 
         var circles = [UIView]()
+        let dx = [1, 9, 1, 9, 1, 9, 5]
+        let dy = [0, 0, 2, 2, 4, 4, 5]
 
         for i in 0 ... 6 {
             let circle = UIView(frame: CGRect(x: 38 * dx[i], y: 42 + 105 * dy[i], width: 72, height: 72))
             circle.backgroundColor = UIColor.systemBlue
             circle.layer.cornerRadius = 35
-            circle.alpha = 0.8
+            circle.alpha = 0.2
             circle.tag = i + 1
+            let gesture = UITapGestureRecognizer(target: self, action:  #selector(self.circleTapped))
+            circle.addGestureRecognizer(gesture)
 
             circles.append(circle)
+        }
+
+        for i in 1 ... 5 {
+            let label = UILabel(frame: CGRect(x: 38 * dx[i] + 15, y: 42 + 45 + 105 * dy[i], width: 40, height: 20))
+            label.text = "\(i)"
+            label.textAlignment = .center
+            label.backgroundColor = .red
+            label.tag = (i + 1) * 100
+
+            view.addSubview(label)
         }
 
         for circ in circles {
             view.addSubview(circ)
         }
 
-        let btn = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
-        btn.setTitle("Start DFS", for: .normal)
-        btn.backgroundColor = .red
-        btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        let startButton = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
+        startButton.setTitle("Start DFS", for: .normal)
+        startButton.backgroundColor = .red
+        startButton.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        
+        let randomButton = UIButton(frame: CGRect(x: 250, y: 40, width: 100, height: 40))
+        randomButton.setTitle("Randomize", for: .normal)
+        randomButton.backgroundColor = .red
+        randomButton.addTarget(self, action: #selector(randomBtnTapped), for: .touchUpInside)
 
         let car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
         car.transform = CGAffineTransform(rotationAngle: .pi)
-//        car.backgroundColor = .red
         car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
         car.tag = 1_337
 
-        view.addSubview(btn)
+        view.addSubview(randomButton)
+        view.addSubview(startButton)
 
         view.layer.addSublayer(contentLayerFinal)
         view.layer.addSublayer(contentLayer)
         view.layer.addSublayer(contentLayer2)
-
+        
         view.addSubview(car)
 
         view.bounds.size.height = 750
