@@ -55,6 +55,9 @@ class MyViewController: UIViewController {
             if i == 3 {
                 randomInt = Int.random(in: 1 ..< 4)
             }
+            if i == 4 {
+                randomInt = Int.random(in: 4 ..< 8)
+            }
             waitTime[i] = randomInt
             timeLabel.text = "\(randomInt)"
         }
