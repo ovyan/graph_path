@@ -238,10 +238,8 @@ class MyViewController: UIViewController {
             self.view.addSubview(self.car)
         }
     }
-    
-    func showAlert() {
-        
-    }
+
+    func showAlert() {}
 
     var isRunning = false
 
@@ -280,7 +278,6 @@ class MyViewController: UIViewController {
         let view = UIView()
         view.backgroundColor = .white
 
-        var circles = [UIView]()
         let dx = [1, 9, 1, 9, 1, 9, 5]
         let dy = [0, 0, 2, 2, 4, 4, 5]
 
@@ -293,7 +290,7 @@ class MyViewController: UIViewController {
             let gesture = UITapGestureRecognizer(target: self, action: #selector(self.circleTapped))
             circle.addGestureRecognizer(gesture)
 
-            circles.append(circle)
+            view.addSubview(circle)
         }
 
         for i in 1 ... 5 {
@@ -304,10 +301,6 @@ class MyViewController: UIViewController {
             label.tag = (i + 1) * 100
 
             view.addSubview(label)
-        }
-
-        for circ in circles {
-            view.addSubview(circ)
         }
 
         let startButton = UIButton(frame: CGRect(x: 130, y: 40, width: 100, height: 40))
