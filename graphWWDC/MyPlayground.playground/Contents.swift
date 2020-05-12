@@ -239,8 +239,6 @@ class MyViewController: UIViewController {
         }
     }
 
-    func showAlert() {}
-
     var isRunning = false
 
     @objc
