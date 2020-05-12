@@ -65,7 +65,6 @@ class MyViewController: UIViewController {
 
     func dfs(vert: Int) {
         if vert == 6 {
-            print("Found")
             print(cost[6])
             print(path)
             shortestPath = path
