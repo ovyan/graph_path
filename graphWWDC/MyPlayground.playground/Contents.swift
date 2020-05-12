@@ -8,6 +8,7 @@ func onMain(_ block: @escaping () -> Void) {
 }
 
 class MyViewController: UIViewController {
+    
     let circleLightsLayer = CALayer()
     let contentLayer = CALayer()
     let contentLayer2 = CALayer()
