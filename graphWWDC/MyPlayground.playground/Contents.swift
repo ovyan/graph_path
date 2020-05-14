@@ -19,6 +19,7 @@ class MyViewController: UIViewController {
     var minusBtn = UIButton(type: .system)
     var doneBtn = UIButton(type: .system)
     var tagToChange = 0
+    var isRunning = false
 
     var Adj_Matr = [
         [-1, -1, -1, -1, -1, -1, -1],
@@ -69,6 +70,9 @@ class MyViewController: UIViewController {
     }
 
     func dfs(vert: Int) {
+        if !isRunning {
+            return
+        }
         if vert == 6 {
             print(cost[6])
             print(path)
@@ -76,7 +80,7 @@ class MyViewController: UIViewController {
             showFinalPath(path: shortestPath)
             return
         }
-        for i in 0 ..< Adj_Matr[vert].count {
+        for i in 0 ..< Adj_Matr[vert].count where isRunning {
             if Adj_Matr[vert][i] != -1, cost[i] == -1 || cost[vert] + Adj_Matr[vert][i] <= cost[i] {
                 cost[i] = cost[vert] + Adj_Matr[vert][i]
                 path.append(i)
@@ -95,7 +99,7 @@ class MyViewController: UIViewController {
             self.contentLayerFinal.sublayers?.forEach { $0.removeFromSuperlayer() }
             CATransaction.commit()
         }
-        for i in 0 ..< path.count - 1 {
+        for i in 0 ..< path.count - 1 where isRunning {
             onMain {
                 let startId = path[i] + 1
                 let endId = path[i + 1] + 1
@@ -128,7 +132,7 @@ class MyViewController: UIViewController {
     }
 
     func showPath(path: [Int]) {
-//        for i in 0 ..< path.count - 1 {
+//        for i in 0 ..< path.count - 1 where isRunning {
 //            onMain {
 //                let startId = path[i] + 1
 //                let endId = path[i + 1] + 1
@@ -174,62 +178,77 @@ class MyViewController: UIViewController {
     }
 
     func driveToPoint(car: UIView, endPoint: CGPoint) {
-        onMain {
-            UIView.animate(withDuration: 2, delay: 0, options: [.curveEaseInOut], animations: {
-                car.center = endPoint
-            }, completion: nil)
+        if isRunning {
+            onMain {
+                UIView.animate(withDuration: 2, delay: 0, options: [.curveEaseInOut], animations: {
+                    car.center = endPoint
+                }, completion: nil)
+            }
         }
     }
 
     func turnCar(car: UIView, endPoint: CGPoint) {
-        onMain {
-            let direction = CGPoint(x: endPoint.x - car.center.x, y: endPoint.y - car.center.y)
-            let angle = atan2(direction.y, direction.x)
-            UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseInOut], animations: {
-                car.transform = CGAffineTransform(rotationAngle: angle + .pi)
-            }, completion: { _ in
-                self.driveToPoint(car: car, endPoint: endPoint)
-            })
+        if isRunning {
+            onMain {
+                let direction = CGPoint(x: endPoint.x - car.center.x, y: endPoint.y - car.center.y)
+                let angle = atan2(direction.y, direction.x)
+                UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseInOut], animations: {
+                    car.transform = CGAffineTransform(rotationAngle: angle + .pi)
+                }, completion: { _ in
+                    self.driveToPoint(car: car, endPoint: endPoint)
+                })
+            }
         }
     }
 
     func animateCircle(duration: TimeInterval, circle: UIView) {
-        onMain {
-            let circlePath = UIBezierPath(arcCenter: CGPoint(x: circle.frame.midX, y: circle.frame.midY), radius: 70 / 2, startAngle: 0.0, endAngle: CGFloat(Double.pi * 2.0), clockwise: true)
+        if isRunning {
+            onMain {
+                let circlePath = UIBezierPath(arcCenter: CGPoint(x: circle.frame.midX, y: circle.frame.midY), radius: 70 / 2, startAngle: 0.0, endAngle: CGFloat(Double.pi * 2.0), clockwise: true)
 
-            let circleLayer = CAShapeLayer()
-            circleLayer.path = circlePath.cgPath
-            circleLayer.fillColor = UIColor.clear.cgColor
-            circleLayer.strokeColor = UIColor.red.cgColor
-            circleLayer.lineWidth = 3.0
-            circleLayer.strokeEnd = 0.0
+                let circleLayer = CAShapeLayer()
+                circleLayer.path = circlePath.cgPath
+                circleLayer.fillColor = UIColor.clear.cgColor
+                circleLayer.strokeColor = UIColor.red.cgColor
+                circleLayer.lineWidth = 3.0
+                circleLayer.strokeEnd = 0.0
 
-            self.circleLightsLayer.addSublayer(circleLayer)
+                self.circleLightsLayer.addSublayer(circleLayer)
 
-            let animation = CABasicAnimation(keyPath: "strokeEnd")
-            animation.duration = duration
-            animation.fromValue = 0
-            animation.toValue = 1
-            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+                let animation = CABasicAnimation(keyPath: "strokeEnd")
+                animation.duration = duration
+                animation.fromValue = 0
+                animation.toValue = 1
+                animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
 
-            circleLayer.strokeEnd = 1.0
+                circleLayer.strokeEnd = 1.0
 
-            circleLayer.add(animation, forKey: "animateCircle")
+                circleLayer.add(animation, forKey: "animateCircle")
+            }
         }
     }
 
     func driveCar(path: [Int]) {
-        for i in 1 ..< path.count {
+        for i in 1 ..< path.count where isRunning {
             let endCircle = DispatchQueue.main.sync {
                 self.view.viewWithTag(path[i] + 1)! as UIView
             }
             let endPoint = DispatchQueue.main.sync {
                 CGPoint(x: endCircle.frame.midX, y: endCircle.frame.midY)
             }
+            // add here
             turnCar(car: car, endPoint: endPoint)
-            sleep(3)
+            var slept = 0.0
+            while slept < 3, isRunning {
+                slept += 0.1
+                usleep(100 * 1000)
+            }
             animateCircle(duration: TimeInterval(waitTime[path[i]]), circle: endCircle)
-            sleep(UInt32(waitTime[path[i]]))
+            slept = 0.0
+            while slept < Double(waitTime[path[i]]), isRunning {
+                slept += 0.1
+                usleep(100 * 1000)
+            }
         }
     }
 
@@ -314,17 +333,13 @@ class MyViewController: UIViewController {
         }
     }
 
-    var isRunning = false
-
     func showAlert() {
-        if isRunning {
-            onMain {
-                let alert = UIAlertController(title: "Congratulations!", message: "You have found the shortest path using DFS", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-                    self.cleanScreen()
-            }))
-                self.present(alert, animated: true, completion: nil)
-            }
+        onMain {
+            let alert = UIAlertController(title: "Congratulations!", message: "You have found the shortest path using DFS", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+                self.cleanScreen()
+        }))
+            self.present(alert, animated: true, completion: nil)
         }
     }
 
@@ -335,18 +350,27 @@ class MyViewController: UIViewController {
             DispatchQueue.global().async {
                 self.isRunning = true
                 self.cleanScreen()
-                self.setupGraph()
-                self.dfs(vert: 0)
-                self.driveCar(path: self.shortestPath)
-                self.showAlert()
-                self.isRunning = false
-                self.onMain {
-                    sender.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
+                if self.isRunning { self.setupGraph() } else {
+                    return
                 }
+                if self.isRunning { self.dfs(vert: 0) } else {
+                    return
+                }
+                if self.isRunning { self.driveCar(path: self.shortestPath) } else {
+                    return
+                }
+                if self.isRunning { self.showAlert() } else {
+                    return
+                }
+                if self.isRunning { self.onMain { sender.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal) } } else {
+                    return
+                }
+                self.isRunning = false
             }
         } else {
-            print("running")
-//            cleanScreen()
+            isRunning = false
+            sender.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
+            cleanScreen()
         }
     }
 
@@ -359,9 +383,11 @@ class MyViewController: UIViewController {
 
     @objc
     func circleTapped(sender: UITapGestureRecognizer) {
-        let tag = sender.view?.tag
-        if tag != 1, tag != 7 {
-            showControlView(circle: sender.view!)
+        if !isRunning {
+            let tag = sender.view?.tag
+            if tag != 1, tag != 7 {
+                showControlView(circle: sender.view!)
+            }
         }
     }
 
@@ -395,7 +421,6 @@ class MyViewController: UIViewController {
         }
 
         let startButton = UIButton(frame: CGRect(x: 130, y: 40, width: 50, height: 50))
-
         startButton.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
         startButton.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
         startButton.backgroundColor = .white
