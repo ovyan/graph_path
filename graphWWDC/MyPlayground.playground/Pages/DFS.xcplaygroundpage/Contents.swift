@@ -9,8 +9,8 @@ class MyViewController: UIViewController {
         DispatchQueue.main.async(execute: block)
     }
 
-    let dx = [38, 342, 38, 342, 38, 342, 190]
-    let dy = [16, 16, 229, 229, 439, 439, 567]
+    let dx = [38, 190, 342, 38, 190, 342, 38, 190, 342,  38, 190, 342, 342]
+    let dy = [16, 16, 16, 166, 166, 166, 316, 316, 316, 466, 466, 466, 616]
 
     let circleLightsLayer = CALayer()
     let contentLayer = CALayer()
@@ -31,37 +31,47 @@ class MyViewController: UIViewController {
 
     var isRunning = false
 
-    var Adj_Matr = Array(repeating: Array(repeating: -1, count: 7), count: 7)
-    var waitTime = [0, 1, 2, 3, 4, 5, 1]
-    var cost = [0, -1, -1, -1, -1, -1, -1]
+    var Adj_Matr = Array(repeating: Array(repeating: -1, count: 13), count: 13)
+    var waitTime = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1]
+    var cost = [0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
     var path = [0]
     var shortestPath = [Int]()
     var allPaths = [[Int]]()
 
     func setupGraph() {
-        cost = [0, -1, -1, -1, -1, -1, -1]
+        cost = [0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
         path = [0]
         shortestPath = [Int]()
         allPaths = [[Int]]()
         Adj_Matr[0][1] = waitTime[1]
-        Adj_Matr[0][2] = waitTime[2]
-        Adj_Matr[1][3] = waitTime[3]
-        Adj_Matr[2][3] = waitTime[3]
-        Adj_Matr[2][4] = waitTime[4]
-        Adj_Matr[3][2] = waitTime[2]
-        Adj_Matr[3][5] = waitTime[5]
+        Adj_Matr[0][3] = waitTime[3]
+        Adj_Matr[1][2] = waitTime[2]
+        Adj_Matr[1][4] = waitTime[4]
+        Adj_Matr[2][5] = waitTime[5]
+        Adj_Matr[3][4] = waitTime[4]
+        Adj_Matr[3][6] = waitTime[6]
+        Adj_Matr[4][3] = waitTime[3]
         Adj_Matr[4][5] = waitTime[5]
-        Adj_Matr[4][6] = waitTime[6]
+        Adj_Matr[4][7] = waitTime[7]
         Adj_Matr[5][4] = waitTime[4]
-        Adj_Matr[5][6] = waitTime[6]
+        Adj_Matr[5][8] = waitTime[8]
+        Adj_Matr[6][7] = waitTime[7]
+        Adj_Matr[6][9] = waitTime[9]
+        Adj_Matr[7][6] = waitTime[6]
+        Adj_Matr[7][8] = waitTime[8]
+        Adj_Matr[7][10] = waitTime[10]
+        Adj_Matr[8][7] = waitTime[7]
+        Adj_Matr[8][11] = waitTime[11]
+        Adj_Matr[9][10] = waitTime[10]
+        Adj_Matr[10][11] = waitTime[11]
+        Adj_Matr[11][12] = waitTime[12]
     }
 
     func randomizeTime() {
-        for i in 1 ... 5 {
+        for i in 1 ... 11 {
             let timeLabel: UILabel = self.view.viewWithTag((i + 1) * 100) as! UILabel
-            var randomInt = Int.random(in: 1 ..< 9)
-            if i == 3 { randomInt = Int.random(in: 1 ..< 4) }
-            if i == 4 { randomInt = Int.random(in: 4 ..< 9) }
+            var randomInt = Int.random(in: 1 ..< 8)
+            if i == 5 { randomInt = Int.random(in: 4 ..< 8) }
             waitTime[i] = randomInt
             onMain {
                 timeLabel.text = "\(randomInt)"
@@ -71,7 +81,7 @@ class MyViewController: UIViewController {
 
     func dfs(vert: Int) {
         if !isRunning { return }
-        if vert == 6 {
+        if vert == 12 {
             shortestPath = path
             return
         }
@@ -90,10 +100,11 @@ class MyViewController: UIViewController {
     }
 
     func presentPaths(paths: [[Int]]) {
+        print(paths.count)
         for path in paths where isRunning {
             showPath(currentPath: path)
-            if path.last == 6 {
-                usleep(500 * 1_000)
+            if path.last == 12 {
+                usleep(100 * 1_000)
                 showFinalPath(path: path)
             }
         }
@@ -101,7 +112,10 @@ class MyViewController: UIViewController {
 
     func showFinalPath(path: [Int]) {
         onMain {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
             self.contentLayerFinal.sublayers?.removeAll()
+            CATransaction.commit()
         }
         var currentLength = 0
         for i in stride(from: 0, to: path.count - 1, by: 1) where isRunning {
@@ -128,6 +142,7 @@ class MyViewController: UIViewController {
                 shapeLayerCircle.strokeColor = UIColor.white.cgColor
                 shapeLayerCircle.lineWidth = 16
 
+
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
                 self.contentLayerFinal.addSublayer(shapeLayer)
@@ -135,6 +150,7 @@ class MyViewController: UIViewController {
                 CATransaction.commit()
             }
         }
+        
         onMain {
             self.lengthLabel.text = "Shortest Length: \(currentLength)"
         }
@@ -177,20 +193,23 @@ class MyViewController: UIViewController {
             }
         }
         if !isRunning { return }
-        usleep(100 * 1_000)
+        usleep(200 * 1_000)
         onMain {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
             if currentPath.count % 2 == 1 {
                 self.contentLayer.sublayers?.removeAll()
             } else {
                 self.contentLayer2.sublayers?.removeAll()
             }
+            CATransaction.commit()
         }
     }
 
     func driveToPoint(car: UIView, endPoint: CGPoint) {
         if isRunning {
             onMain {
-                UIView.animate(withDuration: 2, delay: 0, options: [.curveEaseInOut], animations: {
+                UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseInOut], animations: {
                     car.center = endPoint
                 }, completion: nil)
             }
@@ -240,7 +259,7 @@ class MyViewController: UIViewController {
 
     func driveCar(path: [Int]) {
         onMain {
-            self.contentLayerFinal.opacity = 0.0
+            self.contentLayerFinal.opacity = 0.2
         }
         for i in 1 ..< path.count where isRunning {
             let endCircle = DispatchQueue.main.sync {
@@ -251,7 +270,7 @@ class MyViewController: UIViewController {
             }
             turnCar(car: car, endPoint: endPoint)
             var slept = 0.0
-            while slept < 3, isRunning {
+            while slept < 2, isRunning {
                 slept += 0.1
                 usleep(100 * 1_000)
             }
@@ -261,7 +280,7 @@ class MyViewController: UIViewController {
                 slept += 0.1
                 usleep(100 * 1_000)
             }
-            if isRunning, path[i] < 6 {
+            if isRunning, path[i] < 12 {
                 onMain {
                     let redLight = self.view.viewWithTag((path[i] + 1) * 1_000)! as UIView
                     redLight.alpha = 0
@@ -357,7 +376,7 @@ class MyViewController: UIViewController {
             self.car.transform = CGAffineTransform(rotationAngle: .pi)
             self.car.layer.contents = #imageLiteral(resourceName: "car2.png").cgImage
             self.car.tag = 1_337
-            for i in 1 ... 5 {
+            for i in 1 ... 11 {
                 let redLight = self.view.viewWithTag((i + 1) * 1_000)! as UIView
                 redLight.alpha = 1
                 let greenLight = self.view.viewWithTag((i + 1) * 10_000)! as UIView
@@ -420,16 +439,16 @@ class MyViewController: UIViewController {
     func circleTapped(sender: UITapGestureRecognizer) {
         if !isRunning {
             let tag = sender.view?.tag
-            if tag != 1, tag != 7 {
+            if tag != 1, tag != 13 {
                 showControlView(circle: sender.view!)
             }
         }
     }
 
     func setupCircles() {
-        for i in 0 ... 6 {
+        for i in 0 ... 12 {
             let circle = UIView(frame: CGRect(x: dx[i], y: dy[i], width: 70, height: 70))
-            circle.backgroundColor = UIColor.white
+            circle.backgroundColor = UIColor.blue
             circle.layer.cornerRadius = 35
             circle.alpha = 0.05
             circle.tag = i + 1
@@ -441,7 +460,7 @@ class MyViewController: UIViewController {
     }
 
     func setupRedLights() {
-        for i in 1 ... 5 {
+        for i in 1 ... 11 {
             let redLight = UIView(frame: CGRect(x: dx[i] + 16, y: dy[i] + 20, width: 16, height: 16))
             redLight.backgroundColor = UIColor.red
             redLight.layer.cornerRadius = 8
@@ -460,7 +479,7 @@ class MyViewController: UIViewController {
     }
 
     func setupGreenLights() {
-        for i in 1 ... 5 {
+        for i in 1 ... 11 {
             let greenLight = UIView(frame: CGRect(x: dx[i] + 38, y: dy[i] + 20, width: 16, height: 16))
             greenLight.backgroundColor = UIColor.green
             greenLight.layer.cornerRadius = 8
@@ -479,13 +498,13 @@ class MyViewController: UIViewController {
     }
 
     func setupLabels() {
-        for i in 1 ... 5 {
+        for i in 1 ... 11 {
             let label = UILabel(frame: CGRect(x: 15 + dx[i], y: 45 + dy[i], width: 40, height: 20))
             label.text = "\(i)"
             label.textAlignment = .center
             label.tag = (i + 1) * 100
             label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
-
+            
             self.view.addSubview(label)
         }
     }
@@ -494,14 +513,14 @@ class MyViewController: UIViewController {
         let view = UIView()
         view.backgroundColor = .white
 
-        let startButton = UIButton(frame: CGRect(x: 160, y: 660, width: 50, height: 50))
+        let startButton = UIButton(frame: CGRect(x: 50, y: 626, width: 50, height: 50))
         startButton.setImage(#imageLiteral(resourceName: "triangle.png"), for: .normal)
         startButton.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
         startButton.backgroundColor = .white
         startButton.layer.cornerRadius = 10
         startButton.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
 
-        randomButton.frame = CGRect(x: 220, y: 660, width: 100, height: 50)
+        randomButton.frame = CGRect(x: 110, y: 626, width: 100, height: 50)
         randomButton.setTitle("Random", for: .normal)
         randomButton.backgroundColor = .white
         randomButton.layer.cornerRadius = 10
@@ -523,9 +542,9 @@ class MyViewController: UIViewController {
         view.addSubview(randomButton)
         view.addSubview(startButton)
 
-        view.bounds.size.height = 750
+        view.bounds.size.height = 770
         view.bounds.size.width = 450
-        view.layer.contents = #imageLiteral(resourceName: "field3.png").cgImage
+        view.layer.contents = #imageLiteral(resourceName: "fieldBFS.png").cgImage
 
         self.view = view
     }
@@ -537,8 +556,9 @@ class MyViewController: UIViewController {
         setupGreenLights()
         setupLabels()
         setupControlView()
+        randomizeTime()
 
-        lengthLabel.frame = CGRect(x: 150, y: 70, width: 200, height: 50)
+        lengthLabel.frame = CGRect(x: 150, y: 550, width: 200, height: 50)
         lengthLabel.text = "Shortest Length: -"
         lengthLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
 
