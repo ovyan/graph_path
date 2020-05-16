@@ -240,7 +240,7 @@ class MyViewController: UIViewController {
 
     func driveCar(path: [Int]) {
         onMain {
-            self.contentLayerFinal.opacity = 0.08
+            self.contentLayerFinal.opacity = 0.0
         }
         for i in 1 ..< path.count where isRunning {
             let endCircle = DispatchQueue.main.sync {
