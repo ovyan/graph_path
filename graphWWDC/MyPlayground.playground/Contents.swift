@@ -5,13 +5,12 @@ import PlaygroundSupport
 import UIKit
 
 class MyViewController: UIViewController {
-    
     func onMain(_ block: @escaping () -> Void) {
         DispatchQueue.main.async(execute: block)
     }
 
-    let dx = [1, 9, 1, 9, 1, 9, 5]
-    let dy = [0, 0, 2, 2, 4, 4, 5]
+    let dx = [38, 342, 38, 342, 38, 342, 190]
+    let dy = [16, 16, 229, 229, 439, 439, 567]
 
     let circleLightsLayer = CALayer()
     let contentLayer = CALayer()
@@ -29,7 +28,7 @@ class MyViewController: UIViewController {
     var lengthLabel = UILabel()
 
     var tagToChange = 0
-    
+
     var isRunning = false
 
     var Adj_Matr = Array(repeating: Array(repeating: -1, count: 7), count: 7)
@@ -119,15 +118,16 @@ class MyViewController: UIViewController {
 
                 let shapeLayer = CAShapeLayer()
                 shapeLayer.path = line.cgPath
-                shapeLayer.strokeColor = UIColor.green.cgColor
-                shapeLayer.lineWidth = 16
+                shapeLayer.strokeColor = UIColor.white.cgColor
+                shapeLayer.lineWidth = 18
 
                 let circle = UIBezierPath(roundedRect: CGRect(x: endCircle.frame.midX - 8, y: endCircle.frame.midY - 8, width: 16, height: 16), cornerRadius: 8)
 
                 let shapeLayerCircle = CAShapeLayer()
                 shapeLayerCircle.path = circle.cgPath
-                shapeLayerCircle.strokeColor = UIColor.green.cgColor
+                shapeLayerCircle.strokeColor = UIColor.white.cgColor
                 shapeLayerCircle.lineWidth = 16
+
                 CATransaction.begin()
                 CATransaction.setDisableActions(true)
                 self.contentLayerFinal.addSublayer(shapeLayer)
@@ -136,7 +136,7 @@ class MyViewController: UIViewController {
             }
         }
         onMain {
-            self.lengthLabel.text = "Shortest length: \(currentLength)"
+            self.lengthLabel.text = "Shortest Length: \(currentLength)"
         }
     }
 
@@ -154,14 +154,14 @@ class MyViewController: UIViewController {
 
                 let shapeLayer = CAShapeLayer()
                 shapeLayer.path = line.cgPath
-                shapeLayer.strokeColor = UIColor.white.cgColor
+                shapeLayer.strokeColor = UIColor.systemYellow.cgColor
                 shapeLayer.lineWidth = 10
 
                 let circle = UIBezierPath(roundedRect: CGRect(x: endCircle.frame.midX - 5, y: endCircle.frame.midY - 5, width: 10, height: 10), cornerRadius: 5)
 
                 let shapeLayerCircle = CAShapeLayer()
                 shapeLayerCircle.path = circle.cgPath
-                shapeLayerCircle.strokeColor = UIColor.white.cgColor
+                shapeLayerCircle.strokeColor = UIColor.systemYellow.cgColor
                 shapeLayerCircle.lineWidth = 10
 
                 CATransaction.begin()
@@ -177,7 +177,7 @@ class MyViewController: UIViewController {
             }
         }
         if !isRunning { return }
-        usleep(1_000 * 1_000)
+        usleep(100 * 1_000)
         onMain {
             if currentPath.count % 2 == 1 {
                 self.contentLayer.sublayers?.removeAll()
@@ -219,7 +219,7 @@ class MyViewController: UIViewController {
                 let circleLayer = CAShapeLayer()
                 circleLayer.path = circlePath.cgPath
                 circleLayer.fillColor = UIColor.clear.cgColor
-                circleLayer.strokeColor = UIColor.red.cgColor
+                circleLayer.strokeColor = UIColor.systemRed.cgColor
                 circleLayer.lineWidth = 3.0
                 circleLayer.strokeEnd = 0.0
 
@@ -239,6 +239,9 @@ class MyViewController: UIViewController {
     }
 
     func driveCar(path: [Int]) {
+        onMain {
+            self.contentLayerFinal.opacity = 0.08
+        }
         for i in 1 ..< path.count where isRunning {
             let endCircle = DispatchQueue.main.sync {
                 self.view.viewWithTag(path[i] + 1)! as UIView
@@ -257,6 +260,14 @@ class MyViewController: UIViewController {
             while slept < Double(waitTime[path[i]]), isRunning {
                 slept += 0.1
                 usleep(100 * 1_000)
+            }
+            if isRunning, path[i] < 6 {
+                onMain {
+                    let redLight = self.view.viewWithTag((path[i] + 1) * 1_000)! as UIView
+                    redLight.alpha = 0
+                    let greenLight = self.view.viewWithTag((path[i] + 1) * 10_000)! as UIView
+                    greenLight.alpha = 1
+                }
             }
         }
     }
@@ -334,13 +345,25 @@ class MyViewController: UIViewController {
             self.hideControlView()
             self.circleLightsLayer.sublayers?.removeAll()
             self.contentLayerFinal.sublayers?.removeAll()
+            self.contentLayerFinal.opacity = 1
             self.contentLayer.sublayers?.removeAll()
             self.contentLayer2.sublayers?.removeAll()
             self.car.removeFromSuperview()
-            self.car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
+            self.car = UIView(frame: CGRect(x: 53, y: 40, width: 40, height: 22))
+            self.car.layer.shadowColor = UIColor.black.cgColor
+            self.car.layer.shadowOpacity = 0.5
+            self.car.layer.shadowOffset = CGSize.zero
+            self.car.layer.shadowRadius = 5
             self.car.transform = CGAffineTransform(rotationAngle: .pi)
-            self.car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
+            self.car.layer.contents = #imageLiteral(resourceName: "car2.png").cgImage
             self.car.tag = 1_337
+            for i in 1 ... 5 {
+                let redLight = self.view.viewWithTag((i + 1) * 1_000)! as UIView
+                redLight.alpha = 1
+                let greenLight = self.view.viewWithTag((i + 1) * 10_000)! as UIView
+                greenLight.alpha = 0
+            }
+            self.lengthLabel.text = "Shortest Length: -"
             self.view.addSubview(self.car)
         }
     }
@@ -372,17 +395,15 @@ class MyViewController: UIViewController {
                 if self.isRunning { self.showAlert() } else { return }
                 if self.isRunning {
                     self.onMain {
-                        sender.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
+                        sender.setImage(#imageLiteral(resourceName: "triangle.png"), for: .normal)
                         self.randomButton.backgroundColor = .white
                     }
-                } else {
-                    return
-                }
+                } else { return }
                 self.isRunning = false
             }
         } else {
             isRunning = false
-            sender.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
+            sender.setImage(#imageLiteral(resourceName: "triangle.png"), for: .normal)
             randomButton.backgroundColor = .white
             cleanScreen()
         }
@@ -407,10 +428,10 @@ class MyViewController: UIViewController {
 
     func setupCircles() {
         for i in 0 ... 6 {
-            let circle = UIView(frame: CGRect(x: 38 * dx[i], y: 42 + 105 * dy[i], width: 70, height: 70))
-            circle.backgroundColor = UIColor.systemBlue
+            let circle = UIView(frame: CGRect(x: dx[i], y: dy[i], width: 70, height: 70))
+            circle.backgroundColor = UIColor.white
             circle.layer.cornerRadius = 35
-            circle.alpha = 0.5
+            circle.alpha = 0.05
             circle.tag = i + 1
             let gesture = UITapGestureRecognizer(target: self, action: #selector(self.circleTapped))
             circle.addGestureRecognizer(gesture)
@@ -419,13 +440,51 @@ class MyViewController: UIViewController {
         }
     }
 
+    func setupRedLights() {
+        for i in 1 ... 5 {
+            let redLight = UIView(frame: CGRect(x: dx[i] + 16, y: dy[i] + 20, width: 16, height: 16))
+            redLight.backgroundColor = UIColor.red
+            redLight.layer.cornerRadius = 8
+            redLight.clipsToBounds = true
+            redLight.layer.shadowPath = UIBezierPath(roundedRect: redLight.bounds, cornerRadius: redLight.layer.cornerRadius).cgPath
+            redLight.layer.shadowColor = UIColor.red.cgColor
+            redLight.layer.shadowOpacity = 1
+            redLight.layer.shadowOffset = CGSize(width: 0, height: 0)
+            redLight.layer.shadowRadius = 5
+            redLight.layer.masksToBounds = false
+            redLight.alpha = 1
+            redLight.tag = (i + 1) * 1_000
+
+            self.view.addSubview(redLight)
+        }
+    }
+
+    func setupGreenLights() {
+        for i in 1 ... 5 {
+            let greenLight = UIView(frame: CGRect(x: dx[i] + 38, y: dy[i] + 20, width: 16, height: 16))
+            greenLight.backgroundColor = UIColor.green
+            greenLight.layer.cornerRadius = 8
+            greenLight.clipsToBounds = true
+            greenLight.layer.shadowPath = UIBezierPath(roundedRect: greenLight.bounds, cornerRadius: greenLight.layer.cornerRadius).cgPath
+            greenLight.layer.shadowColor = UIColor.green.cgColor
+            greenLight.layer.shadowOpacity = 1
+            greenLight.layer.shadowOffset = CGSize(width: 0, height: 0)
+            greenLight.layer.shadowRadius = 5
+            greenLight.layer.masksToBounds = false
+            greenLight.alpha = 0
+            greenLight.tag = (i + 1) * 10_000
+
+            self.view.addSubview(greenLight)
+        }
+    }
+
     func setupLabels() {
         for i in 1 ... 5 {
-            let label = UILabel(frame: CGRect(x: 38 * dx[i] + 15, y: 42 + 45 + 105 * dy[i], width: 40, height: 20))
+            let label = UILabel(frame: CGRect(x: 15 + dx[i], y: 45 + dy[i], width: 40, height: 20))
             label.text = "\(i)"
             label.textAlignment = .center
-            label.backgroundColor = .red
             label.tag = (i + 1) * 100
+            label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
 
             self.view.addSubview(label)
         }
@@ -435,14 +494,14 @@ class MyViewController: UIViewController {
         let view = UIView()
         view.backgroundColor = .white
 
-        let startButton = UIButton(frame: CGRect(x: 130, y: 20, width: 50, height: 50))
-        startButton.setImage(#imageLiteral(resourceName: "Triangle.png"), for: .normal)
+        let startButton = UIButton(frame: CGRect(x: 160, y: 660, width: 50, height: 50))
+        startButton.setImage(#imageLiteral(resourceName: "triangle.png"), for: .normal)
         startButton.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
         startButton.backgroundColor = .white
         startButton.layer.cornerRadius = 10
         startButton.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
 
-        randomButton.frame = CGRect(x: 250, y: 20, width: 100, height: 50)
+        randomButton.frame = CGRect(x: 220, y: 660, width: 100, height: 50)
         randomButton.setTitle("Random", for: .normal)
         randomButton.backgroundColor = .white
         randomButton.layer.cornerRadius = 10
@@ -450,18 +509,14 @@ class MyViewController: UIViewController {
         randomButton.tintColor = .systemBlue
         randomButton.addTarget(self, action: #selector(randomBtnTapped), for: .touchUpInside)
 
-        car = UIView(frame: CGRect(x: 54, y: 68, width: 40, height: 22))
+        car = UIView(frame: CGRect(x: 53, y: 40, width: 40, height: 22))
+        car.layer.shadowColor = UIColor.black.cgColor
+        car.layer.shadowOpacity = 0.5
+        car.layer.shadowOffset = CGSize.zero
+        car.layer.shadowRadius = 5
         car.transform = CGAffineTransform(rotationAngle: .pi)
-        car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
+        car.layer.contents = #imageLiteral(resourceName: "car2.png").cgImage
         car.tag = 1_337
-
-        lengthLabel.frame = CGRect(x: 150, y: 100, width: 150, height: 50)
-        lengthLabel.text = "Shortest length: -"
-
-        view.layer.addSublayer(circleLightsLayer)
-        view.layer.addSublayer(contentLayerFinal)
-        view.layer.addSublayer(contentLayer)
-        view.layer.addSublayer(contentLayer2)
 
         view.addSubview(lengthLabel)
         view.addSubview(car)
@@ -470,16 +525,27 @@ class MyViewController: UIViewController {
 
         view.bounds.size.height = 750
         view.bounds.size.width = 450
-        view.layer.contents = #imageLiteral(resourceName: "field1.png").cgImage
+        view.layer.contents = #imageLiteral(resourceName: "field3.png").cgImage
 
         self.view = view
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupControlView()
+        setupRedLights()
         setupCircles()
+        setupGreenLights()
         setupLabels()
+        setupControlView()
+
+        lengthLabel.frame = CGRect(x: 150, y: 70, width: 200, height: 50)
+        lengthLabel.text = "Shortest Length: -"
+        lengthLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+
+        view?.layer.addSublayer(circleLightsLayer)
+        view?.layer.addSublayer(contentLayerFinal)
+        view?.layer.addSublayer(contentLayer)
+        view?.layer.addSublayer(contentLayer2)
     }
 
     override func viewWillLayoutSubviews() {
