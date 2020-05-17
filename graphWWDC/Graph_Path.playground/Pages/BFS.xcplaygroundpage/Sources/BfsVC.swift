@@ -257,7 +257,7 @@ public class BfsViewController: UIViewController {
             self.car.layer.shadowOffset = CGSize.zero
             self.car.layer.shadowRadius = 5
             self.car.transform = CGAffineTransform(rotationAngle: .pi)
-            self.car.layer.contents = #imageLiteral(resourceName: "car2.png").cgImage
+            self.car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
             self.car.tag = 1_337
             for i in 1 ... 11 {
                 let redLight = self.view.viewWithTag((i + 1) * 1_000)! as UIView
@@ -391,7 +391,7 @@ public class BfsViewController: UIViewController {
         car.layer.shadowOffset = CGSize.zero
         car.layer.shadowRadius = 5
         car.transform = CGAffineTransform(rotationAngle: .pi)
-        car.layer.contents = #imageLiteral(resourceName: "car2.png").cgImage
+        car.layer.contents = #imageLiteral(resourceName: "car.png").cgImage
         car.tag = 1_337
 
         view.addSubview(lengthLabel)

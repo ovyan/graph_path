@@ -4,7 +4,7 @@ intro.preferredContentSize = intro.view.frame.size
 /*:
 # Welcome to Graph Path!
 _ _ _
-If you have never heard of graphs, you will certaintly be amazed how often you are using them, and what's more, solving the __shortest path problem__.
+If you have never heard of graphs, you will certainly be amazed how often you are using them, and what's more, solving the __shortest path problem__.
 
 But what is a __Graph__?
  
