@@ -73,22 +73,22 @@ public class IntroViewController: UIViewController {
         directedDescription.text = "A graph in which edges have orientations."
         directedDescription.numberOfLines = 2
 
-        let img = UIImageView(frame: CGRect(x: 10, y: 180, width: 250, height: 175))
+        let img = UIImageView(frame: CGRect(x: 80, y: 180, width: 250, height: 175))
         img.image = #imageLiteral(resourceName: "graph2_1.png")
 
-        let weightedGraph = UILabel(frame: CGRect(x: 40, y: 350, width: 350, height: 50))
+        let weightedGraph = UILabel(frame: CGRect(x: 40, y: 360, width: 350, height: 50))
         weightedGraph.font = UIFont.systemFont(ofSize: 26, weight: .semibold)
         weightedGraph.textColor = Colors.Fonts.blackDefault
         weightedGraph.text = "Weighted Graph"
         weightedGraph.numberOfLines = 1
 
-        let weightedDescription = UILabel(frame: CGRect(x: 40, y: 390, width: 350, height: 50))
+        let weightedDescription = UILabel(frame: CGRect(x: 40, y: 400, width: 350, height: 50))
         weightedDescription.font = UIFont.systemFont(ofSize: 20, weight: .medium)
         weightedDescription.textColor = Colors.Fonts.blackDefault
         weightedDescription.text = "A graph in which a number is assigned to each edge."
         weightedDescription.numberOfLines = 2
 
-        let img2 = UIImageView(frame: CGRect(x: 10, y: 440, width: 250, height: 175))
+        let img2 = UIImageView(frame: CGRect(x: 80, y: 450, width: 250, height: 175))
         img2.image = #imageLiteral(resourceName: "graph2_2.png")
 
         view.addSubview(headerLabel)
@@ -291,7 +291,7 @@ public class IntroViewController: UIViewController {
         let run = UILabel(frame: CGRect(x: 40, y: 220, width: 300, height: 180))
         run.font = UIFont.systemFont(ofSize: 26, weight: .semibold)
         run.textColor = Colors.Fonts.blackDefault
-        run.text = "Run two other playgrounds get a better understading of DFS and BFS."
+        run.text = "Run two another playgrounds get a better understading of DFS and BFS."
         run.numberOfLines = 4
 
         view.addSubview(headerLabel)
@@ -521,18 +521,18 @@ public class IntroViewController: UIViewController {
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        previousBtn = UIButton(frame: CGRect(x: 20, y: 650, width: 100, height: 30))
+        previousBtn = UIButton(frame: CGRect(x: 20, y: 680, width: 100, height: 30))
         previousBtn.setImage(#imageLiteral(resourceName: "arrow_left.png"), for: .normal)
         previousBtn.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
         previousBtn.addTarget(self, action: #selector(previousTapped), for: .touchUpInside)
         previousBtn.isHidden = true
 
-        nextBtn = UIButton(frame: CGRect(x: 360, y: 650, width: 80, height: 30))
+        nextBtn = UIButton(frame: CGRect(x: 360, y: 680, width: 80, height: 30))
         nextBtn.setImage(#imageLiteral(resourceName: "arrow_right.png"), for: .normal)
         nextBtn.imageView?.contentMode = UIView.ContentMode.scaleAspectFit
         nextBtn.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
 
-        pageLabel = UILabel(frame: CGRect(x: 200, y: 700, width: 100, height: 30))
+        pageLabel = UILabel(frame: CGRect(x: 200, y: 680, width: 100, height: 30))
         pageLabel.text = "Page \(pageNum + 1)"
         pages = [firstView, secondView, thirdView, fourthView, fifthView, sixthView, seventhView, eigthView]
         pageLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)

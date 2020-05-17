@@ -103,8 +103,12 @@ public class BfsViewController: UIViewController {
             pathColor = UIColor.systemRed.cgColor
         case 2:
             pathColor = UIColor.systemBlue.cgColor
+        case 3:
+            pathColor = UIColor.systemTeal.cgColor
+        case 4:
+            pathColor = UIColor.systemGreen.cgColor
         default:
-            pathColor = UIColor.black.cgColor
+            pathColor = UIColor.white.cgColor
         }
         for i in stride(from: 0, to: currentPath.count - 1, by: 1) where isRunning {
             onMain {

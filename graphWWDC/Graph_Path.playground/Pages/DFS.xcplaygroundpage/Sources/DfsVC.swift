@@ -98,7 +98,6 @@ public class DfsViewController: UIViewController {
     }
 
     func presentPaths(paths: [[Int]]) {
-        print(paths.count)
         for path in paths where isRunning {
             showPath(currentPath: path)
             if path.last == 12 {
