@@ -2,7 +2,7 @@ import Foundation
 import PlaygroundSupport
 import UIKit
 
-public class MyViewController: UIViewController {
+public class DfsViewController: UIViewController {
     func onMain(_ block: @escaping () -> Void) {
         DispatchQueue.main.async(execute: block)
     }
