@@ -4,7 +4,7 @@ import Foundation
 import PlaygroundSupport
 import UIKit
 
-class MyViewController: UIViewController {
+class MyViewController2: UIViewController {
     func onMain(_ block: @escaping () -> Void) {
         DispatchQueue.main.async(execute: block)
     }
@@ -434,6 +434,6 @@ class MyViewController: UIViewController {
     }
 }
 
-let a = MyViewController()
+let a = MyViewController2()
 a.preferredContentSize = a.view.frame.size
 PlaygroundPage.current.liveView = a
